@@ -140,7 +140,7 @@ do_mount() {
 	mount_point=$(jq -r '.data[0] | select(type == "string")' <<<"$reply" || true)
 	if [[ -z $mount_point ]]; then
 		echo "Error when mounting ${DEVICE}: udisks returned success but could not parse reply:"
-		echo "--- $((reply)) ---"
+		[[ -n $reply ]] && echo "--- $reply ---"
 		# exit 1
 		exit 0
 	fi
