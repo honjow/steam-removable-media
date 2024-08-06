@@ -94,6 +94,18 @@ do_mount() {
 		exit 1
 	fi
 
+	if [[ ${ID_FS_TYPE} == "ntfs" ]]; then
+		echo "Repairing filesystem on ${DEVICE}"
+		# Repair filesystem
+		systemd-run --uid=1000 --pipe \
+			busctl call --allow-interactive-authorization=false --expect-reply=true --json=short \
+			org.freedesktop.UDisks2 \
+			/org/freedesktop/UDisks2/block_devices/"${DEVBASE}" \
+			org.freedesktop.UDisks2.Filesystem \
+			Repair 'a{sv}' 1 \
+			auth.no_user_interaction b true || true
+	fi
+
 	# Ask udisks to auto-mount.  Since this API doesn't let us pass a username to automount as, we need to drop to the
 	# user.  Don't do this as a `--user` unit though as their session may not be running.
 	# This requires the paired polkit file to allow the user the filesystem-mount-other-seat permission.

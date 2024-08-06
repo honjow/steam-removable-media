@@ -9,7 +9,9 @@ polkit.addRule(function(action, subject) {
         "org.freedesktop.udisks2.filesystem-mount-system": YES,
         "org.freedesktop.udisks2.filesystem-unmount-others": YES,
         "org.freedesktop.udisks2.power-off-drive": YES,
-        "org.freedesktop.udisks2.power-off-drive-other-seat": YES
+        "org.freedesktop.udisks2.power-off-drive-other-seat": YES,
+        "org.freedesktop.udisks2.modify-device": YES,
+        "org.freedesktop.udisks2.modify-device-system": YES
     };
 
     if (subject.isInGroup("wheel")) {
