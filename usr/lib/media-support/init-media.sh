@@ -80,24 +80,8 @@ do_init() {
 		rm -rf "${mount_point}/lost+found"
 	fi
 
-	# Build the file structure manually, if necessary.
-	steamapps_dir="${mount_point}/steamapps"
-	if [[ ! -d ${steamapps_dir} ]]; then
-		echo "steamapps dir not found. Creating..."
-		mkdir ${steamapps_dir}
-	fi
-
-	library_file="${mount_point}/libraryfolder.vdf"
-	if [[ ! -f ${library_file} ]]; then
-		echo "libraryfolder.vdf not found. Creating..."
-		echo '"libraryfolder"
-  {
-  	"contentid"		""
-  	"label"		""
-  }' >${library_file}
-	fi
-
 	desktop_dir="${mount_point}/SteamLibrary"
+
 	if [[ -L ${desktop_dir} ]]; then
 		echo "Removing old symlink to ${desktop_dir}"
 		rm ${desktop_dir}
@@ -108,14 +92,21 @@ do_init() {
 		mkdir ${desktop_dir}
 	fi
 
-	if [[ ! -L "${desktop_dir}/steamapps" ]]; then
-		echo "Adding symlink to steamapps dir"
-		ln -s ${steamapps_dir} "${desktop_dir}/steamapps"
+	# Build the file structure manually, if necessary.
+	steamapps_dir="${desktop_dir}/steamapps"
+	if [[ ! -d ${steamapps_dir} ]]; then
+		echo "steamapps dir not found. Creating..."
+		mkdir ${steamapps_dir}
 	fi
 
-	if [[ ! -L "${desktop_dir}/libraryfolder.vdf" ]]; then
-		echo "Adding symlink to libraryfolder.vdf"
-		ln -s ${library_file} "${desktop_dir}/libraryfolder.vdf"
+	library_file="${desktop_dir}/libraryfolder.vdf"
+	if [[ ! -f ${library_file} ]]; then
+		echo "libraryfolder.vdf not found. Creating..."
+		echo '"libraryfolder"
+  {
+  	"contentid"		""
+  	"label"		""
+  }' >${library_file}
 	fi
 
 	chown -R 1000:1000 ${steamapps_dir}

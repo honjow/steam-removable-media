@@ -124,10 +124,10 @@ do_mount() {
 	fi
 
 	# We need symlinks for Steam for now, so only automount ext4 as that'll Steam will format right now
-	if [[ ${ID_FS_TYPE} != "ext4" ]]; then
-		echo "Cannot add ${DEVICE} as steam library: wrong fstype: ${ID_FS_TYPE} - ${dev_json}"
-		exit 0
-	fi
+	# if [[ ${ID_FS_TYPE} != "ext4" ]]; then
+	# 	echo "Cannot add ${DEVICE} as steam library: wrong fstype: ${ID_FS_TYPE} - ${dev_json}"
+	# 	exit 0
+	# fi
 
 	# Create a symlink from /run/media to keep compatibility with apps
 	# that use the older mount point (for SD cards only).
@@ -147,13 +147,15 @@ do_mount() {
 
 	echo "**** Mounted ${DEVICE} at ${mount_point} ****"
 	# Check if this is a steam library.
-	steamapps_dir="${mount_point}/steamapps"
+	# steamapps_dir="${mount_point}/steamapps"
+	steamapps_dir="${mount_point}/SteamLibrary/steamapps"
 	if [ ! -d ${steamapps_dir} ]; then
 		echo "Unable to find a steamapps dir. Device is not a library. Run init-media to build steam library. Nothing else to do."
 		exit 0
 	# If Steam is running, notify it.
 	else
-		send_steam_url "addlibraryfolder" $mount_point
+		# send_steam_url "addlibraryfolder" $mount_point
+		send_steam_url "addlibraryfolder" "${mount_point}/SteamLibrary"
 		echo "${DEVICE} added as a steam library at ${mount_point}"
 	fi
 }
@@ -162,7 +164,8 @@ do_unmount() {
 	# If Steam is running, notify it
 	local mount_point=$(findmnt -fno TARGET "${DEVICE}" || true)
 	if [[ -n $mount_point ]]; then
-		send_steam_url "removelibraryfolder" "${mount_point}"
+		# send_steam_url "removelibraryfolder" "${mount_point}"
+		send_steam_url "removelibraryfolder" "${mount_point}/SteamLibrary"
 		# Remove symlink to the mount point that we're unmounting
 		find /run/media -maxdepth 1 -xdev -type l -lname "${mount_point}" -exec rm -- {} \;
 	else
@@ -180,7 +183,8 @@ do_retrigger() {
 	# This is a truly gnarly way to ensure steam is ready for commands.
 	# TODO literally anything else
 	sleep 6
-	send_steam_url "addlibraryfolder" $mount_point
+	# send_steam_url "addlibraryfolder" $mount_point
+	send_steam_url "addlibraryfolder" "${mount_point}/SteamLibrary"
 }
 
 case "${ACTION}" in
