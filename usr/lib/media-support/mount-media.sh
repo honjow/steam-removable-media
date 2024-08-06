@@ -110,17 +110,21 @@ do_mount() {
 	# user.  Don't do this as a `--user` unit though as their session may not be running.
 	# This requires the paired polkit file to allow the user the filesystem-mount-other-seat permission.
 	ret=0
-	reply=$(systemd-run --uid=1000 --pipe \
+	reply=$(sudo systemd-run --uid=1000 --pipe \
 		busctl call --allow-interactive-authorization=false --expect-reply=true --json=short \
 		org.freedesktop.UDisks2 \
 		/org/freedesktop/UDisks2/block_devices/"${DEVBASE}" \
 		org.freedesktop.UDisks2.Filesystem \
 		Mount 'a{sv}' 2 \
 		auth.no_user_interaction b true \
-		options s "$OPTS") || ret=$?
+		options s "$OPTS" 2>&1) || ret=$?
 
 	# Report to Steam if we failed to mount the device.
 	if [[ $ret -ne 0 ]]; then
+		if [[ ! "already mounted" =~ "$reply" ]]; then
+			echo "${DEVBASE} is already mounted. Nothing to do."
+			exit 0
+		fi
 		send_steam_url "system/devicemountresult" "${DEVBASE}/${ret}"
 		echo "Error mounting ${DEVICE} -- (status = $ret)"
 		exit 1
