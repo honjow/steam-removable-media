@@ -130,13 +130,19 @@ do_mount() {
 		exit 1
 	fi
 
+	if [[ -z $reply ]]; then
+		echo "Error mounting ${DEVICE}: udisks returned success but no reply"
+		exit 0
+	fi
+
 	# Expected reply is of the format
 	#  {"type":"s","data":["/run/media/$USER/$DEVICE_UUID"]}
 	mount_point=$(jq -r '.data[0] | select(type == "string")' <<<"$reply" || true)
 	if [[ -z $mount_point ]]; then
 		echo "Error when mounting ${DEVICE}: udisks returned success but could not parse reply:"
 		echo "--- $((reply)) ---"
-		exit 1
+		# exit 1
+		exit 0
 	fi
 
 	# We need symlinks for Steam for now, so only automount ext4 as that'll Steam will format right now
